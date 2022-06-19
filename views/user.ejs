@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerenciador de Gastos</title>
+  </head>
+
+  <body>
+    <h1>Gerenciador de Gastos</h1>
+    balance<input id="balance1" /><button onclick="newBalance()">send</button>
+    <div id="balance"></div>
+    <br />
+    debts<input id="debts1" /><button onclick="newDebts()">send</button>
+    <div id="debts"></div>
+    <br />
+    payments<input id="payments1" /><button onclick="newPayments()">
+      send
+    </button>
+    <div id="payments"></div>
+    <br />
+    spending<input id="spending1" /><button onclick="newspending()">
+      send
+    </button>
+    <div id="spending"></div>
+    <br />
+    <br />
+    <a href="/api/bankStatement1">BankStatement</a>
+    <BR /><BR /><BR />
+    <div id="bankStatement"></div>
+    <BR /><BR /><BR />
+    <button onclick="generatePDF()">PDF</button>
+
+    <script>
+      //reload function
+      document.addEventListener("DOMContentLoaded", () => {
+        updateBalance();
+      });
+      //get request
+      function updateBalance() {
+        fetch("http://localhost:4000/api/balance")
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            console.log(json);
+
+            let balance1Elements = "";
+            var balance = JSON.parse(json);
+            var jsonID = JSON.parse(json);
+
+            const item = jsonID.map((item) => item.id);
+            var itemWorks = item.toString();
+            console.log(itemWorks);
+
+            balance.forEach((balance1) => {
+              let balance1Element = `<div id=${balance1.id}>
+                                    <h5>${balance1.currentBalance}</h5>
+                                    <a href="/api/balance/${balance1.id}">remove</a>
+                                </div> <br>`;
+
+              balance1Elements = balance1Elements + balance1Element;
+              document.getElementById("balance").innerHTML = balance1Elements;
+            });
+          });
+
+        fetch("http://localhost:4000/api/debts")
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            console.log(json);
+
+            var debts1Elements = "";
+            var debts = JSON.parse(json);
+
+            debts.forEach((debts1) => {
+              var debtsID = debts1.id;
+              let debts1Element = `<div id="${debts1.id}">
+                                    <h5>${debts1.currentDebts}</h5>
+                                    <a href="/api/debts/${debts1.id}">remove</a>
+                                    <a href="/api/debtsPaid/${debts1.id}">paid</a>
+                                </div>`;
+
+              debts1Elements += debts1Element;
+            });
+            document.getElementById("debts").innerHTML = debts1Elements;
+          });
+
+        fetch("http://localhost:4000/api/payments")
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            console.log(json);
+
+            var payments1Elements = "";
+            var payments = JSON.parse(json);
+
+            payments.forEach((payments1) => {
+              var paymentsID = payments1.id;
+              let payments1Element = `<div id="${payments1.id}">
+                                    <h5>${payments1.currentPayments}</h5>
+                                    <a href="/api/payments/${payments1.id}">remove</a>
+                                    <a href="/api/paymentsReceived/${payments1.id}">Received</a>
+                                </div>`;
+
+              payments1Elements += payments1Element;
+            });
+            document.getElementById("payments").innerHTML = payments1Elements;
+          });
+
+        fetch("http://localhost:4000/api/spending")
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            console.log(json);
+
+            var spending1Elements = "";
+            var spending = JSON.parse(json);
+
+            spending.forEach((spending1) => {
+              var spendingID = spending1.id;
+              let spending1Element = `<div id="${spending1.id}">
+                                    <h5>${spending1.currentsPending}</h5>
+                                    <a href="/api/spending/${spending1.id}">remove</a>
+                                </div>`;
+
+              spending1Elements += spending1Element;
+            });
+            document.getElementById("spending").innerHTML = spending1Elements;
+          });
+        //TODO: nothing here mate just testing the extension
+
+        fetch("http://localhost:4000/api/bankStatement")
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            console.log(json);
+
+            var bankStatement1Elements = "";
+            var bankStatement = JSON.parse(json);
+
+            bankStatement.forEach((bankStatement1) => {
+              let bankStatement1Element = `    <h1>bank statement</h1>
+                                              <p>balance:${bankStatement1.currentBalance} </p>
+                                              <p>activeDebts:${bankStatement1.activeDebts} </p>
+                                              <p>debtsPaid: ${bankStatement1.debtsPaid}</p>
+                                              <p>paymentReceived: ${bankStatement1.paymentReceived}</p>
+                                              <p>spended: ${bankStatement1.spended}</p>`;
+
+              bankStatement1Elements += bankStatement1Element;
+            });
+            document.getElementById("bankStatement").innerHTML =
+              bankStatement1Elements;
+          });
+      }
+
+      //posts request
+      function newBalance() {
+        let balance1 = document.getElementById("balance1").value;
+        let balance = { balance: balance1 };
+
+        console.log(JSON.stringify(balance));
+        const options = {
+          method: "POST",
+          headers: new Headers({ "content-type": "application/json" }),
+          body: JSON.stringify(balance),
+        };
+
+        fetch("http://localhost:4000/api/balance", options).then((res) =>
+          console.log(res)
+        );
+        this.updateBalance();
+      }
+
+      function newDebts() {
+        let debts1 = document.getElementById("debts1").value;
+        let debts = { debts: debts1 };
+
+        console.log(JSON.stringify(debts));
+        const options = {
+          method: "POST",
+          headers: new Headers({ "content-type": "application/json" }),
+          body: JSON.stringify(debts),
+        };
+
+        fetch("http://localhost:4000/api/debts", options).then((res) =>
+          console.log(res)
+        );
+        this.updateBalance();
+      }
+
+      function newPayments() {
+        let payments1 = document.getElementById("payments1").value;
+        let payments = { payments: payments1 };
+
+        console.log(JSON.stringify(payments));
+        const options = {
+          method: "POST",
+          headers: new Headers({ "content-type": "application/json" }),
+          body: JSON.stringify(payments),
+        };
+
+        fetch("http://localhost:4000/api/payments", options).then((res) =>
+          console.log(res)
+        );
+        this.updateBalance();
+      }
+
+      function newspending() {
+        let spending1 = document.getElementById("spending1").value;
+        let spending = { spending: spending1 };
+
+        console.log(JSON.stringify(spending));
+        const options = {
+          method: "POST",
+          headers: new Headers({ "content-type": "application/json" }),
+          body: JSON.stringify(spending),
+        };
+
+        fetch("http://localhost:4000/api/spending", options).then((res) =>
+          console.log(res)
+        );
+        this.updateBalance();
+      }
+
+      function validationToResult() {
+        let balance1 = document.getElementById("balance1").value;
+        let debts1 = document.getElementById("debts1").value;
+        let payments1 = document.getElementById("payments1").value;
+        let spending1 = document.getElementById("spending1").value;
+
+        if (
+          balance1 == "" ||
+          debts1 == "" ||
+          payments1 == "" ||
+          spending1 == ""
+        ) {
+          alert("The field must be filled out");
+        } else {
+          resultPost();
+        }
+      }
+
+      function generatePDF() {
+        var data = document.getElementById("bankStatement").innerHTML;
+
+        var window1 = window.open("", "", "width=800,height=600");
+        window1.document.write("<html><head>");
+        window1.document.write("<title>PDF</title></head>");
+        window1.document.write("<body>");
+        window1.document.write(data);
+        window1.document.write("</body></html>");
+        window1.document.close();
+        window1.print();
+      }
+    </script>
+  </body>
+</html>
